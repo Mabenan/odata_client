@@ -1,12 +1,23 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 import 'package:odata_client/odata_client.dart';
+import 'package:odata_client/odata_connection.dart';
 
 void main() {
-  test('adds one to input values', () {
-    final calculator = Calculator();
-    expect(calculator.addOne(2), 3);
-    expect(calculator.addOne(-7), -6);
-    expect(calculator.addOne(0), 1);
+  test('returns connection', () {
+    ODataConnection? connection = ODataClient().getConnection(Uri.http("services.odata.org", "TripPinRESTierService"));
+    expect(connection, isNot(null));
+  });
+  test('returns same connection for baseURI', () {
+    ODataConnection connection = ODataClient().getConnection(Uri.http("services.odata.org", "TripPinRESTierService"));
+    ODataConnection connection2 = ODataClient().getConnection(Uri.http("services.odata.org", "TripPinRESTierService"));
+    expect(connection, equals(connection2));
+  });
+  test('returns different connection for different baseURI', () {
+    ODataConnection connection = ODataClient().getConnection(Uri.http("services.odata.org", "TripPinRESTierService"));
+    ODataConnection connection2 = ODataClient().getConnection(Uri.http("services2.odata.org", "TripPinRESTierService"));
+    expect(connection, isNot(null));
+    expect(connection2, isNot(null));
+    expect(connection, isNot(connection2));
   });
 }
