@@ -52,7 +52,9 @@ class ODataConnection{
     return _init;
   }
 
-
+  /// Returns an EntitySet of type [T]
+  ///
+  /// If [T] is not provided or is not registered on the Client [entityName] needs to be provided
   Future<T> entitySet<T extends ODataEntitySet>({String? entityName}) async{
     if(await init()) {
       ODataEntitySetConstructor? setConst = ODataClient().getEntitySet<T>();

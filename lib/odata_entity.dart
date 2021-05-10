@@ -1,4 +1,7 @@
+/// Constructor function to register [ODataEntity] on Client
 typedef ODataEntityConstructor = ODataEntity Function();
+
+/// Base class for all Entities
 class ODataEntity {
 
   Map<String,dynamic> _properties = {};

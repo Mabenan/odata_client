@@ -33,9 +33,16 @@ class ODataClient {
      return _connections[baseUri];
   }
 
+  /// Registers a subclass of [ODataEntitySet]
+  ///
+  /// [T] must be provided
   registerEntitySet<T>(ODataEntitySetConstructor constructor){
     _entitySetConstructor[T] = constructor;
   }
+
+  /// Registers a subclass of [ODataEntity]
+  ///
+  /// [T] must be provided
   registerEntity<T>(ODataEntityConstructor constructor){
     _entityConstructor[T] = constructor;
   }

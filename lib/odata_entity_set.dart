@@ -1,7 +1,11 @@
 
 import 'package:odata_client/odata_client.dart';
 import 'package:odata_client/odata_entity.dart';
+
+/// Constructor function to register [ODataEntitySet] on Client
 typedef ODataEntitySetConstructor = ODataEntitySet Function();
+
+/// Base class for all EntitySets on Client
 class ODataEntitySet<T extends ODataEntity> extends Iterable<T> with Iterator<T>{
 
   List<T> _entities = [];
