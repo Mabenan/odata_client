@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:mutex/mutex.dart';
+import 'package:odata_client/odata_client.dart';
+import 'package:odata_client/odata_entity_set.dart';
 import 'package:xml/xml.dart';
 
 class ODataConnection{
@@ -11,6 +14,8 @@ class ODataConnection{
   String _authString = "";
 
   bool _init = false;
+
+  final Mutex _initLock = Mutex();
 
   XmlDocument? _metadata;
 
@@ -29,30 +34,48 @@ class ODataConnection{
   /// Can be called directly but is latest called before first request
   Future<bool> init() async{
     if(!_init){
-        http.Response resp = await get(baseURI.resolve("\$metadata"));
-        if(resp.statusCode == 403
-        || resp.statusCode == 401){
-          throw ODataLoginException();
+      await _initLock.acquire();
+      try {
+        if (!_init) {
+          http.Response resp = await get(baseURI.resolve("\$metadata"));
+          if (resp.statusCode == 403
+              || resp.statusCode == 401) {
+            throw ODataLoginException();
+          }
+          _metadata = XmlDocument.parse(resp.body);
+          _init = true;
         }
-        _metadata = XmlDocument.parse(resp.body);
+      }finally{
+        _initLock.release();
+      }
     }
     return _init;
   }
 
 
-  Future<List<dynamic>> entitySet(String entityName) async{
+  Future<T> entitySet<T extends ODataEntitySet>({String? entityName}) async{
     if(await init()) {
-      http.Response resp = await get(baseURI.resolve(entityName));
-      return jsonDecode(resp.body);
+      ODataEntitySetConstructor? setConst = ODataClient().getEntitySet<T>();
+      ODataEntitySet entitySet;
+      if(setConst == null){
+        entitySet = ODataEntitySet(entityName!);
+      }else{
+        entitySet = setConst();
+      }
+      http.Response resp = await get(baseURI.resolve(entitySet.entityName));
+      return (entitySet..fromJson(jsonDecode(resp.body)["value"] as List) ) as T;
     }else{
       throw Exception("cannot initialize");
     }
   }
 
   Future<http.Response> get(Uri uri) async {
-    http.Response resp = await client.get(uri,
-        headers: { "Authorization": _authString});
-    return resp;
+    if(_authString != "") {
+      return await client.get(uri,
+          headers: { "Authorization": _authString});
+    }else{
+      return await client.get(uri);
+    }
   }
 
 
