@@ -36,7 +36,7 @@ void main() {
       client.get(serverUri.resolve("\$metadata"), headers: anyNamed("headers")),
     ).thenAnswer((realInvocation) => http.get(serverUri.resolve("\$metadata")));
     connection.login("test", "pass");
-    expect(await connection.entitySet(entityName: "People"), equals(TypeMatcher<ODataEntitySet>()));
+    expect(await connection.getEntitySet(entityName: "People"), equals(TypeMatcher<ODataEntitySet>()));
     verify(client.get(any,
         headers: {"Authorization": getAuthString("test", "pass")}));
   });
@@ -56,7 +56,7 @@ void main() {
       client.get(serverUri.resolve("\$metadata"), headers: anyNamed("headers")),
     ).thenAnswer((realInvocation) async => http.Response("",401));
     connection.login("test", "pass");
-    expect(connection.entitySet(entityName:"People"), throwsA(TypeMatcher<ODataLoginException>()));
+    expect(connection.getEntitySet(entityName:"People"), throwsA(TypeMatcher<ODataLoginException>()));
     verify(client.get(serverUri.resolve("\$metadata"),
         headers: {"Authorization": getAuthString("test", "pass")}));
 
@@ -71,7 +71,7 @@ void main() {
     when(
       client.get(serverUri.resolve("\$metadata"), headers: anyNamed("headers")),
     ).thenAnswer((realInvocation) => http.get(serverUri.resolve("\$metadata")));
-    expect(await connection.entitySet(entityName:"People"), equals(TypeMatcher<ODataEntitySet>()));
+    expect(await connection.getEntitySet(entityName:"People"), equals(TypeMatcher<ODataEntitySet>()));
     verify(client.get(any,
         headers: {"Authorization": getAuthString("test", "pass")}));
   });
