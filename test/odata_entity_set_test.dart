@@ -40,7 +40,7 @@ void main() {
     when(
       client.get(serverUri.resolve("People"), headers: null),
     ).thenAnswer((realInvocation) => http.get(serverUri.resolve("People")));
-    ODataEntitySet entitySet = await connection.entitySet(entityName:"People");
+    ODataEntitySet entitySet = await connection.getEntitySet(entityName:"People");
     expect(entitySet, isNotNull);
     expect(entitySet.first.get<String>("FirstName"), equals("Russell"));
   });
@@ -50,7 +50,7 @@ void main() {
     when(
       client.get(serverUri.resolve("People"), headers: null),
     ).thenAnswer((realInvocation) => http.get(serverUri.resolve("People")));
-    PeopleSet entitySet = await connection.entitySet<PeopleSet>();
+    PeopleSet entitySet = await connection.getEntitySet<PeopleSet>();
     expect(entitySet, isNotNull);
     expect(entitySet, equals(TypeMatcher<PeopleSet>()));
     expect(entitySet.first, equals(TypeMatcher<People>()));
