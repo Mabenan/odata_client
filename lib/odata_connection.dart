@@ -5,6 +5,7 @@ import 'package:mutex/mutex.dart';
 import 'package:odata_client/odata_client.dart';
 import 'package:odata_client/odata_entity.dart';
 import 'package:odata_client/odata_entity_set.dart';
+import 'package:odata_client/odata_query.dart';
 import 'package:xml/xml.dart';
 
 class ODataConnection{
@@ -56,10 +57,14 @@ class ODataConnection{
   /// Returns an EntitySet of type [T]
   ///
   /// If [T] is not provided or is not registered on the Client [entityName] needs to be provided
-  Future<T> getEntitySet<T extends ODataEntitySet>({String? entityName}) async{
+  Future<T> getEntitySet<T extends ODataEntitySet>({String? entityName, ODataQuery? query}) async{
     if(await init()) {
       ODataEntitySet<ODataEntity> entitySet = _getEntitySetInstance<T>(entityName);
-      http.Response resp = await _get(baseURI.resolve(entitySet.entityName));
+      Uri uri = baseURI.resolve(entitySet.entityName);
+      if(query != null){
+        uri = uri.replace(query: query.toString());
+      }
+      http.Response resp = await _get(uri);
       return (entitySet..fromJson(jsonDecode(resp.body)["value"] as List) ) as T;
     }else{
       throw Exception("cannot initialize");
@@ -75,13 +80,13 @@ class ODataConnection{
       var keyString = "";
       if(key.length == 1){
         var keyPair = key.entries.first;
-        keyString = formatKeyValue(keyPair);
+        keyString = oDataUriFormat(keyPair.value);
       }else {
         for (var keyPair in key.entries) {
           if (keyString != "") {
             keyString += ",";
           }
-          keyString += keyPair.key + "="+formatKeyValue(keyPair);
+          keyString += keyPair.key + "="+oDataUriFormat(keyPair.value);
         }
       }
       http.Response resp = await _get(baseURI.resolve(entity.entityName+"("+ keyString + ")"));
@@ -123,18 +128,6 @@ class ODataConnection{
     return entity;
   }
 
-  String formatKeyValue(MapEntry<String, dynamic> keyPair) {
-    switch(keyPair.value.runtimeType){
-      case String:
-        return "'" + keyPair.value.toString() + "'";
-      case double:
-        return keyPair.value.toString();
-      case int:
-        return keyPair.value.toString();
-      default:
-        return "'" + keyPair.value.toString() + "'";
-    }
-  }
 
 
 }

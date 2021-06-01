@@ -3,6 +3,7 @@ library odata_client;
 import 'package:odata_client/odata_connection.dart';
 import 'package:http/http.dart' as http;
 import 'package:odata_client/odata_entity.dart';
+import 'package:odata_client/odata_enum.dart';
 
 import 'odata_entity_set.dart';
 
@@ -54,4 +55,34 @@ class ODataClient {
     return _entityConstructor[T];
   }
 
+}
+
+
+
+String oDataUriFormat(dynamic value) {
+  if(value is List){
+    var valueString = "(";
+    for (var subValue in value) {
+      if (valueString != "(") {
+        valueString += ", ";
+      }
+      valueString += oDataUriFormat(subValue);
+    }
+    valueString += ")";
+    return valueString;
+  }else {
+    switch (value.runtimeType) {
+      case String:
+        return "'" + value.toString() + "'";
+      case double:
+        return value.toString();
+      case int:
+        return value.toString();
+      case ODataEnumValue:
+        return value.toString();
+        break;
+      default:
+        return "'" + value.toString() + "'";
+    }
+  }
 }
