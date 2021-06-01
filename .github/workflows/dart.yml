@@ -23,8 +23,8 @@ jobs:
       # https://github.com/dart-lang/setup-dart/blob/main/README.md
       # - uses: dart-lang/setup-dart@v1
       - uses: subosito/flutter-action@v1
-          with:
-            channel: 'stable'
+        with:
+          channel: 'stable'
 
       - name: Install dependencies
         run: dart pub get
@@ -44,6 +44,6 @@ jobs:
         run: flutter --no-color test --machine --coverage test
 
       - name: Coveralls
-          uses: coverallsapp/github-action@master
-          with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
