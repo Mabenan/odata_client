@@ -11,7 +11,7 @@ class ODataQuery {
   /// ?$filter=FirstName eq 'Scott'&$expand=Trips($filter=Name eq 'Trip in US')
   ODataQuery filter() {
     if (_query != "" && _query[_query.length - 1] != "(") {
-      if (_query.contains("\$filter")) {
+      if (!_query.contains("(") || _query.lastIndexOf("\filter") > _query.lastIndexOf(")")) {
         throw ODataQueryException("you cannot start filter twice");
       }
     }
@@ -25,14 +25,16 @@ class ODataQuery {
   /// Starts the expand definition
   ///
   /// Only one expand allowed per query on top level
-  ODataQuery expand() {
-    if (_query != "" && _query.contains("\$expand")) {
-      throw ODataQueryException("you cannot expand twice");
+  ODataQuery expand(String field) {
+    if (_query != "" && _query[_query.length - 1] != "(") {
+      if (_query.lastIndexOf("\$expand") > _query.lastIndexOf(")")) {
+        throw ODataQueryException("you cannot expand twice");
+      }
     }
     if (_query != "")
-      _query += "&\$expand=";
+      _query += "&\$expand=" + field;
     else
-      _query += "\$expand=";
+      _query += "\$expand=" + field;
     return this;
   }
 
@@ -40,12 +42,13 @@ class ODataQuery {
   ///
   /// Only one select allowed per query on top level
   ODataQuery select(List<String> fields) {
-    if (_query[_query.length - 1] != "(") {
-      if (_query.contains("\$select")) {
-        throw ODataQueryException("you cannot expand twice");
+    if (_query != "" && _query[_query.length - 1] != "(") {
+      if (_query.lastIndexOf("\$select") > _query.lastIndexOf(")")) {
+        throw ODataQueryException("you cannot select twice");
       }
     }
-    if (_query != "")
+    if (_query != ""
+     && _query[_query.length - 1] != "(")
       _query += "&\$select=";
     else
       _query += "\$select=";
@@ -90,7 +93,7 @@ class ODataQuery {
     if (_query.endsWith("=") ||
         _query.endsWith("or ") ||
         _query.endsWith("and ") ||
-        _query.endsWith("( ")) {
+        _query.endsWith("(")) {
       _query += key + " " + op + " " + oDataUriFormat(value);
     } else {
       throw ODataQueryException("you must connect two operations");
@@ -99,20 +102,22 @@ class ODataQuery {
   }
 
   ODataQuery bracketOpen() {
-    _query += "( ";
+    _query += "(";
     return this;
   }
 
   ODataQuery bracketClose() {
-    _query += " )";
+    _query += ")";
     return this;
   }
 
   ODataQuery and() {
+    _query += " and ";
     return this;
   }
 
   ODataQuery or() {
+    _query += " or ";
     return this;
   }
 

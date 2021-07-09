@@ -14,6 +14,8 @@ import 'odata_client_global_mock.mocks.dart';
 
 class People extends ODataEntity{
   People() : super("People");
+  People.clone(): this();
+  @override clone() => People.clone()..fromJson(toJson());
 
 }
 class PeopleSet extends ODataEntitySet<People>{
@@ -45,6 +47,17 @@ void main() {
     expect(entity.get<String>("FirstName"), equals("Russell"));
     verify(client.get(serverUri.resolve("People('russellwhyte')"), headers: null));
   });
+  test("can clone", () async {
+    var connection = getConnection();
+    when(
+      client.get(serverUri.resolve("People('russellwhyte')"), headers: null),
+    ).thenAnswer((realInvocation) => http.get(serverUri.resolve("People('russellwhyte')")));
+    ODataEntity entity = await connection.getEntity({"UserName": "russellwhyte"}, entityName: "People");
+    ODataEntity clone = entity.clone();
+    expect(clone, isNotNull);
+    expect(clone.get<String>("FirstName"), equals("Russell"));
+    verify(client.get(serverUri.resolve("People('russellwhyte')"), headers: null));
+  });
 
   test("uses Custom Object", () async {
     var connection = getConnection();
@@ -56,6 +69,20 @@ void main() {
     expect(entity, equals(TypeMatcher<People>()));
     expect(entity.get<String>("FirstName"), equals("Russell"));
     verify(client.get(serverUri.resolve("People('russellwhyte')"), headers: null));
+  });
+
+  test("can clone Object", () async {
+    var connection = getConnection();
+    when(
+      client.get(serverUri.resolve("People('russellwhyte')"), headers: null),
+    ).thenAnswer((realInvocation) => http.get(serverUri.resolve("People('russellwhyte')")));
+    People entity = await connection.getEntity<People>({"UserName": "russellwhyte"});
+    People clone  = entity.clone();
+    expect(clone, isNotNull);
+    expect(clone, equals(TypeMatcher<People>()));
+    expect(clone.get<String>("FirstName"), equals("Russell"));
+    verify(client.get(serverUri.resolve("People('russellwhyte')"), headers: null));
+
   });
 
   test("handles multi key", () async {

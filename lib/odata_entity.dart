@@ -6,6 +6,7 @@ class ODataEntity {
 
   Map<String,dynamic> _properties = {};
 
+
   final String entityName;
 
   ODataEntity(this.entityName){
@@ -15,12 +16,14 @@ class ODataEntity {
     return _properties[property] as T;
   }
 
+  Map<String, dynamic> toJson() => _properties;
+
   ODataEntity.clone(String entityName) : this(entityName);
   dynamic fromJson(Map<String, dynamic> json) {
     _properties = json;
 
   }
 
-  dynamic clone(Map<String, dynamic> map) =>
-      ODataEntity.clone(entityName)..fromJson(map);
+  dynamic clone() =>
+      ODataEntity.clone(entityName)..fromJson(toJson());
 }
